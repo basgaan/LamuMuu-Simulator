@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LamuMuu Simulator: Chain Graze</title>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.js"></script>
+  <style>
+    body { margin: 0; background: #111; }
+    canvas { display: block; margin: auto; }
+  </style>
+</head>
+<body>
+  <script>
+    const config = {
+      type: Phaser.AUTO,
+      width: 800,
+      height: 600,
+      backgroundColor: '#2a2a2a',
+      physics: {
+        default: 'arcade',
+        arcade: {
+          gravity: { y: 0 },
+          debug: false
+        }
+      },
+      scene: {
+        preload,
+        create,
+        update
+      }
+    };
+
+    let cow, cursors, grass, milk = 0, milkText;
+
+    const game = new Phaser.Game(config);
+
+    function preload() {
+      this.load.image('cow', 'https://upload.wikimedia.org/wikipedia/commons/3/3f/Cow_icon.png');
+      this.load.image('grass', 'https://i.imgur.com/h3p7lZj.png'); // placeholder grass
+    }
+
+    function create() {
+      cow = this.physics.add.sprite(400, 300, 'cow');
+      cow.setScale(0.2);
+      cow.setCollideWorldBounds(true);
+
+      cursors = this.input.keyboard.createCursorKeys();
+
+      grass = this.physics.add.group({
+        key: 'grass',
+        repeat: 20,
+        setXY: { x: 30, y: 30, stepX: 70, stepY: 50 }
+      });
+
+      this.physics.add.overlap(cow, grass, graze, null, this);
+
+      milkText = this.add.text(10, 10, 'MILK: 0', { fontSize: '24px', fill: '#fff' });
+    }
+
+    function update() {
+      cow.setVelocity(0);
+
+      if (cursors.left.isDown) cow.setVelocityX(-200);
+      if (cursors.right.isDown) cow.setVelocityX(200);
+      if (cursors.up.isDown) cow.setVelocityY(-200);
+      if (cursors.down.isDown) cow.setVelocityY(200);
+
+      if (Phaser.Input.Keyboard.JustDown(cursors.space)) {
+        this.add.text(Phaser.Math.Between(100, 700), Phaser.Math.Between(100, 500), 'MOOO!', {
+          fontSize: '20px', fill: '#ff69b4'
+        });
+      }
+    }
+
+    function graze(cow, grassTile) {
+      grassTile.destroy();
+      milk += 1;
+      milkText.setText('MILK: ' + milk);
+    }
+  </script>
+</body>
+</html>
